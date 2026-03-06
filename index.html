@@ -204,13 +204,13 @@ function Toggle({ label, desc, value, onChange }) {
 }
 
 const NAV = [
-  { id:"dashboard",  label:"მთ. დაფა",    icon:"⬛" },
-  { id:"inventory",  label:"ინვენტარი",   icon:"📦" },
-  { id:"categories", label:"კატეგ.",      icon:"🗂" },
-  { id:"purchases",  label:"შესყიდვ.",    icon:"🛒" },
+  { id:"dashboard",  label:"მთავარი გვერდი",    icon:"⬛" },
+  { id:"inventory",  label:"საწყობი",   icon:"📦" },
+  { id:"categories", label:"კატეგორია",      icon:"🗂" },
+  { id:"purchases",  label:"შესყიდვები",    icon:"🛒" },
   { id:"spends",     label:"ხარჯები",     icon:"💸" },
-  { id:"reports",    label:"ანგარ.",      icon:"📊" },
-  { id:"settings",   label:"პარამ.",      icon:"⚙️" },
+  { id:"reports",    label:"რეპორტი",      icon:"📊" },
+  { id:"settings",   label:"პარამეტრები",      icon:"⚙️" },
 ];
 
 function App() {
@@ -310,7 +310,7 @@ function App() {
 
     return <>
       <div style={{ display:"flex", justifyContent:"space-between", alignItems:"center", marginBottom:18 }}>
-        <h2 style={{ fontSize:20, fontWeight:800, color:G.text, margin:0 }}>მთავარი დაფა</h2>
+        <h2 style={{ fontSize:20, fontWeight:800, color:G.text, margin:0 }}>მთავარი გვერდი</h2>
         <div style={{ display:"flex", gap:8 }}>
           <Btn size="sm" variant="secondary" onClick={()=>setModal("purch")}>🛒 შეს.</Btn>
           <Btn size="sm" onClick={()=>setModal("spend")}>💸 ხარ.</Btn>
