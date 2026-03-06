@@ -1,0 +1,823 @@
+<!DOCTYPE html>
+<html lang="ka">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>სტრუქტურა დეველოპმენტი</title>
+  <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+  <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+</head>
+<body>
+  <div id="root"></div>
+  <script type="text/babel">
+
+
+const G = {
+  bg: "#F0F2F5", sidebar: "#111827", sidebarBorder: "#1F2937",
+  accent: "#D32F2F", accentLight: "#FFF5F5",
+  text: "#111827", textSecondary: "#6B7280", textMuted: "#9CA3AF",
+  border: "#E5E7EB", card: "#FFFFFF",
+  green: "#16A34A", blue: "#1D4ED8", amber: "#D97706", purple: "#7C3AED",
+};
+const FONT = `'Segoe UI','DejaVu Sans',Georgia,sans-serif`;
+
+const ADDRESSES = [
+  { id:1, name:"ობიექტი I – რუსთაველის გამზ. 15, ვაკე",          short:"ობ. I · ვაკე",   color:"#D32F2F", light:"#FFF5F5" },
+  { id:2, name:"ობიექტი II – ჭავჭავაძის გამზ. 45, საბურთალო",    short:"ობ. II · საბ.",  color:"#1D4ED8", light:"#EFF6FF" },
+  { id:3, name:"ობიექტი III – კახეთის გზ. 77, ისანი",            short:"ობ. III · ისანი", color:"#16A34A", light:"#F0FDF4" },
+];
+
+const INIT_CATS = [
+  { id:1, name:"სამშ. მასალები",      icon:"🧱", color:"#D97706" },
+  { id:2, name:"ელექტრო სამ.",        icon:"⚡", color:"#1D4ED8" },
+  { id:3, name:"სანტექნიკა",          icon:"🔧", color:"#0891B2" },
+  { id:4, name:"სახ. / იზოლ.",       icon:"🏠", color:"#7C3AED" },
+  { id:5, name:"ხელსაწყოები",         icon:"🔨", color:"#D32F2F" },
+  { id:6, name:"უსაფ-ა",             icon:"🦺", color:"#16A34A" },
+  { id:7, name:"ტექნიკა / გენ.",     icon:"⚙️", color:"#374151" },
+  { id:8, name:"სხვა",               icon:"📦", color:"#6B7280" },
+];
+
+const MONTHS_F = ["იანვარი","თებერვალი","მარტი","აპრილი","მაისი","ივნისი","ივლისი","აგვისტო","სექტემბერი","ოქტომბერი","ნოემბერი","დეკემბერი"];
+const MONTHS_S = ["იანვ","თებ","მარ","აპრ","მაი","ივნ","ივლ","აგვ","სექ","ოქტ","ნოე","დეკ"];
+const UNITS = ["ც.","კგ","ტ","მ","მ²","მ³","ლ","კომპლ.","ყუთი","პალეტი"];
+
+const STATUS_META = {
+  "დასრულებული": { bg:"#DCFCE7", color:"#166534", dot:"#16A34A" },
+  "მიმდინარე":   { bg:"#DBEAFE", color:"#1E40AF", dot:"#1D4ED8" },
+  "მოლოდინი":    { bg:"#FEF9C3", color:"#854D0E", dot:"#D97706" },
+  "დამტკიცებული":{ bg:"#DCFCE7", color:"#166534", dot:"#16A34A" },
+  "უარყოფილი":   { bg:"#FEE2E2", color:"#991B1B", dot:"#D32F2F" },
+};
+
+let _uid = 1000;
+function uid() { return `_${_uid++}`; }
+
+const ITEMS0 = [
+  { id:uid(), name:"ცემენტი M400",       catId:1, unit:"კგ",  qty:5000, minQ:500, price:0.45, addrId:1, notes:"ნესტ. ადგ-დან დაც." },
+  { id:uid(), name:"ბეტ. ბლოკი",         catId:1, unit:"ც.", qty:320,  minQ:50,  price:3.20, addrId:2, notes:"" },
+  { id:uid(), name:"არმატ. D12",          catId:1, unit:"ტ",  qty:8.5,  minQ:1,   price:890,  addrId:1, notes:"" },
+  { id:uid(), name:"ელ-კ. 2.5mm²",       catId:2, unit:"მ",  qty:1200, minQ:100, price:1.20, addrId:3, notes:"" },
+  { id:uid(), name:"ამომრთ. 16A",         catId:2, unit:"ც.", qty:45,   minQ:10,  price:8.50, addrId:2, notes:"" },
+  { id:uid(), name:"მილი PVC D50",        catId:3, unit:"მ",  qty:230,  minQ:30,  price:4.80, addrId:1, notes:"" },
+  { id:uid(), name:"ვ.ბანდ. D50",         catId:3, unit:"ც.", qty:12,   minQ:5,   price:2.10, addrId:3, notes:"⚠ მ. მ." },
+  { id:uid(), name:"ქვიშა საფ.",          catId:1, unit:"მ³", qty:40,   minQ:5,   price:18,   addrId:2, notes:"" },
+  { id:uid(), name:"გიფსი (ტომ.)",        catId:1, unit:"ც.", qty:180,  minQ:20,  price:6.50, addrId:1, notes:"" },
+  { id:uid(), name:"სამ. ხელთ.",          catId:6, unit:"წყვ",qty:80,   minQ:20,  price:1.80, addrId:3, notes:"" },
+  { id:uid(), name:"ბოლტი M10×80",        catId:5, unit:"ც.", qty:4,    minQ:50,  price:0.30, addrId:1, notes:"" },
+];
+const PURCH0 = [
+  { id:uid(), date:"2026-01-15", item:"ცემ. M400",      catId:1, addrId:1, qty:3000, unit:"კგ", up:0.45, sup:"სამშ.სუპ.",   status:"დასრულებული", notes:"" },
+  { id:uid(), date:"2026-01-28", item:"ბეტ. ბლოკი",    catId:1, addrId:2, qty:200,  unit:"ც.", up:3.20, sup:"ბეტ-ჯგ.",    status:"დასრულებული", notes:"" },
+  { id:uid(), date:"2026-02-10", item:"ელ-კ. 2.5mm²",  catId:2, addrId:3, qty:500,  unit:"მ",  up:1.20, sup:"ელ.ბაზ.",    status:"დასრულებული", notes:"" },
+  { id:uid(), date:"2026-02-22", item:"არმ. D12",       catId:1, addrId:1, qty:5,    unit:"ტ",  up:890,  sup:"მეტ-გეო",   status:"დასრულებული", notes:"" },
+  { id:uid(), date:"2026-03-02", item:"ბეტ. ბლოკი",    catId:1, addrId:2, qty:100,  unit:"ც.", up:3.20, sup:"ბეტ-ჯგ.",    status:"მიმდინარე",   notes:"" },
+  { id:uid(), date:"2026-03-05", item:"მილი PVC D50",  catId:3, addrId:1, qty:80,   unit:"მ",  up:4.80, sup:"სანტ+",      status:"მოლოდინი",   notes:"10 მარ." },
+];
+const SPENDS0 = [
+  { id:uid(), date:"2026-01-20", desc:"ბეტ. სამ. – საფ.",      catId:1, addrId:1, amount:4500, status:"დამტკიცებული", notes:"" },
+  { id:uid(), date:"2026-02-08", desc:"ელ. სად. – სარდ.",      catId:2, addrId:3, amount:1200, status:"დამტკიცებული", notes:"" },
+  { id:uid(), date:"2026-02-25", desc:"სანტ. სამ. – I სართ.", catId:3, addrId:1, amount:3800, status:"დამტკიცებული", notes:"" },
+  { id:uid(), date:"2026-03-03", desc:"კარ-ფანჯ. კ.",         catId:5, addrId:2, amount:7800, status:"მოლოდინი",    notes:"" },
+  { id:uid(), date:"2026-03-06", desc:"ხელ. ანაზ. მარ.",      catId:5, addrId:3, amount:5200, status:"მოლოდინი",    notes:"მარ. ანაზ." },
+];
+
+/* ── TINY UI ── */
+function Badge({ status }) {
+  const m = STATUS_META[status] || { bg:"#F3F4F6", color:"#374151", dot:"#9CA3AF" };
+  return <span style={{ display:"inline-flex", alignItems:"center", gap:4, background:m.bg, color:m.color, borderRadius:20, padding:"3px 9px", fontSize:11, fontWeight:700, whiteSpace:"nowrap" }}>
+    <span style={{ width:5, height:5, borderRadius:"50%", background:m.dot, display:"inline-block" }} />{status}
+  </span>;
+}
+function APill({ addrId }) {
+  const a = ADDRESSES.find(x=>x.id===addrId);
+  if (!a) return null;
+  return <span style={{ background:a.light, color:a.color, border:`1px solid ${a.color}30`, borderRadius:6, padding:"2px 7px", fontSize:11, fontWeight:700, whiteSpace:"nowrap" }}>{a.short}</span>;
+}
+function KCard({ label, value, icon, color="#111827", sub }) {
+  return <div style={{ background:G.card, borderRadius:12, padding:"16px 18px", boxShadow:"0 1px 3px rgba(0,0,0,0.09)", position:"relative", overflow:"hidden" }}>
+    <div style={{ position:"absolute", right:14, top:12, fontSize:24, opacity:.12 }}>{icon}</div>
+    <div style={{ fontSize:10, fontWeight:700, color:G.textMuted, textTransform:"uppercase", letterSpacing:.8, marginBottom:5 }}>{label}</div>
+    <div style={{ fontSize:24, fontWeight:800, color, lineHeight:1, letterSpacing:-.5 }}>{value}</div>
+    {sub && <div style={{ fontSize:10, color:G.textMuted, marginTop:4 }}>{sub}</div>}
+  </div>;
+}
+function F({ label, children }) {
+  return <div style={{ display:"flex", flexDirection:"column", gap:3 }}>
+    {label && <label style={{ fontSize:11, fontWeight:700, color:G.textSecondary, letterSpacing:.3 }}>{label}</label>}
+    {children}
+  </div>;
+}
+const iStyle = { border:`1.5px solid ${G.border}`, borderRadius:8, padding:"8px 11px", fontSize:13, color:G.text, outline:"none", background:"#FAFAFA", fontFamily:FONT, width:"100%", boxSizing:"border-box" };
+function Inp({ label, ...p }) { return <F label={label}><input {...p} style={{ ...iStyle, ...p.style }} /></F>; }
+function Sel({ label, children, ...p }) { return <F label={label}><select {...p} style={{ ...iStyle, cursor:"pointer", ...p.style }}>{children}</select></F>; }
+function Txa({ label, ...p }) { return <F label={label}><textarea {...p} style={{ ...iStyle, resize:"vertical", minHeight:60, ...p.style }} /></F>; }
+
+const btnV = {
+  primary:   { background:G.accent, color:"#fff",    border:"none" },
+  secondary: { background:"#F3F4F6", color:G.text,   border:`1px solid ${G.border}` },
+  success:   { background:G.green,  color:"#fff",    border:"none" },
+  ghost:     { background:"transparent", color:G.textSecondary, border:"none" },
+};
+const btnS = { sm:{padding:"6px 12px",fontSize:12}, md:{padding:"8px 16px",fontSize:13}, lg:{padding:"10px 22px",fontSize:14} };
+function Btn({ children, variant="primary", size="md", ...p }) {
+  return <button {...p} style={{ ...btnV[variant], ...btnS[size], borderRadius:8, fontWeight:700, cursor:"pointer", fontFamily:FONT, display:"inline-flex", alignItems:"center", gap:5, ...p.style }}>{children}</button>;
+}
+
+function Modal({ title, onClose, width=560, children }) {
+  return <div style={{ position:"fixed", inset:0, background:"rgba(0,0,0,0.55)", zIndex:1000, display:"flex", alignItems:"center", justifyContent:"center", padding:16 }}
+    onClick={e=>{ if(e.target===e.currentTarget) onClose(); }}>
+    <div style={{ background:"#fff", borderRadius:16, width:`min(95vw,${width}px)`, maxHeight:"92vh", overflow:"auto", boxShadow:"0 24px 60px rgba(0,0,0,0.28)" }}>
+      <div style={{ display:"flex", alignItems:"center", justifyContent:"space-between", padding:"18px 22px 14px", borderBottom:`1px solid ${G.border}` }}>
+        <span style={{ fontWeight:800, fontSize:15, color:G.text }}>{title}</span>
+        <button onClick={onClose} style={{ border:"none", background:"#F3F4F6", borderRadius:7, width:28, height:28, cursor:"pointer", fontSize:15, color:G.textSecondary, display:"flex", alignItems:"center", justifyContent:"center" }}>✕</button>
+      </div>
+      <div style={{ padding:"18px 22px 22px", overflowY:"auto" }}>{children}</div>
+    </div>
+  </div>;
+}
+
+function DataTable({ cols, rows, footer }) {
+  return <div style={{ background:G.card, borderRadius:12, boxShadow:"0 1px 3px rgba(0,0,0,0.09)", overflow:"hidden" }}>
+    <div style={{ overflowX:"auto" }}>
+      <table style={{ width:"100%", borderCollapse:"collapse" }}>
+        <thead><tr style={{ background:"#F9FAFB" }}>
+          {cols.map(c=><th key={c.k} style={{ padding:"10px 13px", textAlign:"left", fontSize:10, color:G.textMuted, fontWeight:700, textTransform:"uppercase", letterSpacing:.7, whiteSpace:"nowrap" }}>{c.label}</th>)}
+        </tr></thead>
+        <tbody>
+          {rows.length===0
+            ? <tr><td colSpan={cols.length} style={{ padding:"36px", textAlign:"center", color:G.textMuted, fontSize:13 }}>ჩანაწერი ვერ მოიძებნა</td></tr>
+            : rows.map((row,i)=><tr key={row.id||i} style={{ borderTop:`1px solid ${G.border}`, background:i%2===1?"#FAFAFA":"#fff" }}>
+                {cols.map(c=><td key={c.k} style={{ padding:"9px 13px", fontSize:13, color:G.text, verticalAlign:"middle" }}>{c.fn ? c.fn(row) : row[c.k]}</td>)}
+              </tr>)
+          }
+        </tbody>
+      </table>
+    </div>
+    {footer && <div style={{ padding:"9px 13px", background:"#F9FAFB", borderTop:`1px solid ${G.border}`, display:"flex", gap:18, flexWrap:"wrap", alignItems:"center" }}>{footer}</div>}
+  </div>;
+}
+
+function Filters({ addr, setAddr, month, setMonth, cat, setCat, status, setStatus, cats, extra }) {
+  const ss = { border:`1.5px solid ${G.border}`, borderRadius:8, padding:"7px 11px", fontSize:12, color:G.text, background:"#fff", cursor:"pointer", fontFamily:FONT, fontWeight:600 };
+  const dirty = addr!=="all"||month!=="all"||cat!=="all"||(status&&status!=="all");
+  return <div style={{ display:"flex", gap:8, flexWrap:"wrap", marginBottom:14, alignItems:"center" }}>
+    <span style={{ fontSize:10, fontWeight:700, color:G.textMuted, textTransform:"uppercase", letterSpacing:.7 }}>ფილტ.:</span>
+    <select value={addr} onChange={e=>setAddr(e.target.value)} style={ss}>
+      <option value="all">🏗 ყველა ობ.</option>
+      {ADDRESSES.map(a=><option key={a.id} value={a.id}>{a.short}</option>)}
+    </select>
+    <select value={month} onChange={e=>setMonth(e.target.value)} style={ss}>
+      <option value="all">📅 ყველა თვე</option>
+      {MONTHS_F.map((m,i)=><option key={i} value={i}>{m}</option>)}
+    </select>
+    <select value={cat} onChange={e=>setCat(e.target.value)} style={ss}>
+      <option value="all">🗂 ყველა კატ.</option>
+      {cats.map(c=><option key={c.id} value={c.id}>{c.icon} {c.name}</option>)}
+    </select>
+    {status !== undefined && <select value={status} onChange={e=>setStatus(e.target.value)} style={ss}>
+      <option value="all">📋 ყველა სტ.</option>
+      {Object.keys(STATUS_META).map(s=><option key={s}>{s}</option>)}
+    </select>}
+    {extra}
+    {dirty && <button onClick={()=>{ setAddr("all"); setMonth("all"); setCat("all"); setStatus&&setStatus("all"); }} style={{ border:"none", background:G.accentLight, color:G.accent, borderRadius:8, padding:"7px 11px", fontSize:11, fontWeight:700, cursor:"pointer", fontFamily:FONT }}>✕ გასუფ.</button>}
+  </div>;
+}
+
+function SearchBox({ value, onChange, ph="ძიება..." }) {
+  return <div style={{ position:"relative" }}>
+    <span style={{ position:"absolute", left:9, top:"50%", transform:"translateY(-50%)", color:G.textMuted, fontSize:13 }}>🔍</span>
+    <input value={value} onChange={e=>onChange(e.target.value)} placeholder={ph} style={{ ...iStyle, paddingLeft:28, width:200 }} />
+  </div>;
+}
+
+function Toggle({ label, desc, value, onChange }) {
+  return <div style={{ display:"flex", justifyContent:"space-between", alignItems:"center", padding:"10px 0", borderBottom:`1px solid ${G.border}` }}>
+    <div><div style={{ fontSize:13, fontWeight:600, color:G.text }}>{label}</div>{desc&&<div style={{ fontSize:11, color:G.textMuted, marginTop:1 }}>{desc}</div>}</div>
+    <div onClick={onChange} style={{ width:38, height:21, borderRadius:11, background:value?G.accent:"#D1D5DB", cursor:"pointer", position:"relative", transition:"background .18s", flexShrink:0, marginLeft:14 }}>
+      <div style={{ position:"absolute", top:2.5, left:value?18:2.5, width:16, height:16, borderRadius:"50%", background:"#fff", transition:"left .18s", boxShadow:"0 1px 3px rgba(0,0,0,.2)" }} />
+    </div>
+  </div>;
+}
+
+const NAV = [
+  { id:"dashboard",  label:"მთ. დაფა",    icon:"⬛" },
+  { id:"inventory",  label:"ინვენტარი",   icon:"📦" },
+  { id:"categories", label:"კატეგ.",      icon:"🗂" },
+  { id:"purchases",  label:"შესყიდვ.",    icon:"🛒" },
+  { id:"spends",     label:"ხარჯები",     icon:"💸" },
+  { id:"reports",    label:"ანგარ.",      icon:"📊" },
+  { id:"settings",   label:"პარამ.",      icon:"⚙️" },
+];
+
+function App() {
+  const [page, setPage] = useState("dashboard");
+  const [items, setItems] = useState(ITEMS0);
+  const [purch, setPurch] = useState(PURCH0);
+  const [spends, setSpends] = useState(SPENDS0);
+  const [cats, setCats] = useState(INIT_CATS);
+  const [collapsed, setCollapsed] = useState(false);
+  const [notifOpen, setNotifOpen] = useState(false);
+
+  /* filters */
+  const [fA, setFA] = useState("all");
+  const [fM, setFM] = useState("all");
+  const [fC, setFC] = useState("all");
+  const [fSt, setFSt] = useState("all");
+
+  /* search */
+  const [sI, setSI] = useState("");
+  const [sP, setSP] = useState("");
+  const [sSp, setSSp] = useState("");
+
+  /* modal stack */
+  const [modal, setModal] = useState(null);
+  const [detItem, setDetItem] = useState(null);
+
+  /* forms */
+  const E_ITEM  = { name:"", catId:"1", unit:"ც.", qty:"", minQ:"", price:"", addrId:"1", notes:"" };
+  const E_PURCH = { date:new Date().toISOString().slice(0,10), item:"", catId:"1", addrId:"1", qty:"", unit:"ც.", up:"", sup:"", status:"მიმდინარე", notes:"" };
+  const E_SPEND = { date:new Date().toISOString().slice(0,10), desc:"", catId:"1", addrId:"1", amount:"", status:"მოლოდინი", notes:"" };
+  const E_CAT   = { name:"", icon:"📦", color:"#6B7280" };
+  const [iF, setIF] = useState(E_ITEM);
+  const [pF, setPF] = useState(E_PURCH);
+  const [sF, setSF] = useState(E_SPEND);
+  const [cF, setCF] = useState(E_CAT);
+
+  /* settings */
+  const [cfg, setCfg] = useState({ lowAlert:true, autoOrder:false, emailNotif:true, approval:true, cur:"₾", tax:"18", defUnit:"ც." });
+
+  /* computed */
+  const now = new Date();
+  const cm = now.getMonth();
+  const lowItems = useMemo(()=>items.filter(i=>i.qty<=i.minQ),[items]);
+  const invVal   = useMemo(()=>items.reduce((s,i)=>s+i.price*i.qty,0),[items]);
+  const thisPur  = useMemo(()=>purch.filter(p=>new Date(p.date).getMonth()===cm),[purch,cm]);
+  const thisSp   = useMemo(()=>spends.filter(s=>new Date(s.date).getMonth()===cm),[spends,cm]);
+
+  function filt(arr, getA, getM, getC, getSt, search, getN) {
+    return arr.filter(r=>{
+      if(fA!=="all"&&getA(r)!==+fA) return false;
+      if(fM!=="all"&&getM(r)!==+fM) return false;
+      if(fC!=="all"&&getC(r)!==+fC) return false;
+      if(fSt!=="all"&&getSt&&getSt(r)!==fSt) return false;
+      if(search&&!getN(r).toLowerCase().includes(search.toLowerCase())) return false;
+      return true;
+    });
+  }
+
+  const fItems = useMemo(()=>filt(items,r=>r.addrId,()=>-1,r=>r.catId,null,sI,r=>r.name),[items,fA,fC,sI]);
+  const fPurch = useMemo(()=>filt(purch,r=>r.addrId,r=>new Date(r.date).getMonth(),r=>r.catId,r=>r.status,sP,r=>r.item),[purch,fA,fM,fC,fSt,sP]);
+  const fSpend = useMemo(()=>filt(spends,r=>r.addrId,r=>new Date(r.date).getMonth(),r=>r.catId,r=>r.status,sSp,r=>r.desc),[spends,fA,fM,fC,fSt,sSp]);
+
+  const cur = cfg.cur;
+
+  function addItem() {
+    setItems(p=>[...p,{id:uid(),name:iF.name,catId:+iF.catId,unit:iF.unit,qty:+iF.qty,minQ:+iF.minQ,price:+iF.price,addrId:+iF.addrId,notes:iF.notes}]);
+    setIF(E_ITEM); setModal(null);
+  }
+  function addPurch() {
+    const p={id:uid(),date:pF.date,item:pF.item,catId:+pF.catId,addrId:+pF.addrId,qty:+pF.qty,unit:pF.unit,up:+pF.up,sup:pF.sup,status:pF.status,notes:pF.notes};
+    setPurch(prev=>[p,...prev]);
+    setItems(prev=>{ const i=prev.findIndex(x=>x.name===p.item&&x.addrId===p.addrId); if(i>=0){const c=[...prev];c[i]={...c[i],qty:c[i].qty+p.qty};return c;} return prev; });
+    setPF(E_PURCH); setModal(null);
+  }
+  function addSpend() {
+    setSpends(p=>[{id:uid(),date:sF.date,desc:sF.desc,catId:+sF.catId,addrId:+sF.addrId,amount:+sF.amount,status:sF.status,notes:sF.notes},...p]);
+    setSF(E_SPEND); setModal(null);
+  }
+  function addCat() {
+    setCats(p=>[...p,{id:Date.now(),name:cF.name,icon:cF.icon,color:cF.color}]);
+    setCF(E_CAT); setModal(null);
+  }
+
+  /* ── PAGES ── */
+  function PageDashboard() {
+    const addrSt = ADDRESSES.map(a=>({
+      ...a,
+      pT: purch.filter(p=>p.addrId===a.id).reduce((s,p)=>s+p.qty*p.up,0),
+      sT: spends.filter(s=>s.addrId===a.id).reduce((s,sp)=>s+sp.amount,0),
+      cnt: items.filter(i=>i.addrId===a.id).length,
+      low: items.filter(i=>i.addrId===a.id&&i.qty<=i.minQ).length,
+    }));
+    const recent=[
+      ...purch.slice(0,5).map(p=>({...p,_t:"შეს.",_n:p.item,_v:p.qty*p.up})),
+      ...spends.slice(0,5).map(s=>({...s,_t:"ხარ.",_n:s.desc,_v:s.amount})),
+    ].sort((a,b)=>new Date(b.date)-new Date(a.date)).slice(0,8);
+
+    return <>
+      <div style={{ display:"flex", justifyContent:"space-between", alignItems:"center", marginBottom:18 }}>
+        <h2 style={{ fontSize:20, fontWeight:800, color:G.text, margin:0 }}>მთავარი დაფა</h2>
+        <div style={{ display:"flex", gap:8 }}>
+          <Btn size="sm" variant="secondary" onClick={()=>setModal("purch")}>🛒 შეს.</Btn>
+          <Btn size="sm" onClick={()=>setModal("spend")}>💸 ხარ.</Btn>
+        </div>
+      </div>
+
+      <div style={{ display:"grid", gridTemplateColumns:"repeat(auto-fit,minmax(160px,1fr))", gap:10, marginBottom:18 }}>
+        <KCard label="ინვ. ღირ." value={`${cur}${invVal.toLocaleString("ka-GE",{maximumFractionDigits:0})}`} icon="💰" color={G.accent} />
+        <KCard label={`${MONTHS_S[cm]} შეს.`} value={`${cur}${thisPur.reduce((s,p)=>s+p.qty*p.up,0).toFixed(0)}`} icon="🛒" color={G.blue} />
+        <KCard label={`${MONTHS_S[cm]} ხარ.`} value={`${cur}${thisSp.reduce((s,sp)=>s+sp.amount,0).toFixed(0)}`} icon="💸" color={G.amber} />
+        <KCard label="მ. მარ." value={lowItems.length} icon="⚠️" color={lowItems.length>0?G.accent:G.green} sub={lowItems.length>0?"გამაფ. საჭ.":"ყველა ნ."} />
+        <KCard label="პოზ." value={items.length} icon="📦" color={G.text} />
+        <KCard label="ობ." value={ADDRESSES.length} icon="🏗" color={G.purple} />
+      </div>
+
+      <div style={{ fontSize:11, fontWeight:700, color:G.textMuted, textTransform:"uppercase", letterSpacing:.7, marginBottom:10 }}>ობიექტების მდგ.</div>
+      <div style={{ display:"grid", gridTemplateColumns:"repeat(auto-fit,minmax(240px,1fr))", gap:10, marginBottom:20 }}>
+        {addrSt.map(a=><div key={a.id} style={{ background:G.card, borderRadius:12, padding:"16px 18px", boxShadow:"0 1px 3px rgba(0,0,0,.09)", borderTop:`3px solid ${a.color}` }}>
+          <div style={{ display:"flex", justifyContent:"space-between", alignItems:"flex-start", marginBottom:12 }}>
+            <div>
+              <div style={{ fontSize:13, fontWeight:700, color:G.text }}>{a.name.split(" – ")[0]}</div>
+              <div style={{ fontSize:11, color:G.textMuted, marginTop:1 }}>{a.name.split(" – ")[1]}</div>
+            </div>
+            {a.low>0&&<span style={{ background:"#FEE2E2", color:"#991B1B", borderRadius:20, padding:"2px 8px", fontSize:11, fontWeight:700 }}>⚠ {a.low}</span>}
+          </div>
+          <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr 1fr", gap:6 }}>
+            {[["შეს.",`${cur}${a.pT.toFixed(0)}`,a.color],["ხარ.",`${cur}${a.sT.toFixed(0)}`,G.accent],["პოზ.",a.cnt,G.purple]].map(([l,v,c])=>
+              <div key={l} style={{ background:"#F9FAFB", borderRadius:8, padding:"7px 9px" }}>
+                <div style={{ fontSize:9, color:G.textMuted, fontWeight:700, textTransform:"uppercase", letterSpacing:.5 }}>{l}</div>
+                <div style={{ fontSize:15, fontWeight:800, color:c, marginTop:2 }}>{v}</div>
+              </div>
+            )}
+          </div>
+        </div>)}
+      </div>
+
+      <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:14 }}>
+        <div>
+          <div style={{ fontSize:11, fontWeight:700, color:G.textMuted, textTransform:"uppercase", letterSpacing:.7, marginBottom:10 }}>⚠️ მცირე მარ.</div>
+          {lowItems.length===0
+            ? <div style={{ background:G.card, borderRadius:12, padding:24, textAlign:"center", color:G.green, fontSize:13, fontWeight:600, boxShadow:"0 1px 3px rgba(0,0,0,.09)" }}>✅ ყველა ნ.</div>
+            : <div style={{ background:G.card, borderRadius:12, boxShadow:"0 1px 3px rgba(0,0,0,.09)", overflow:"hidden" }}>
+                {lowItems.map((i,idx)=><div key={i.id} style={{ display:"flex", justifyContent:"space-between", alignItems:"center", padding:"9px 13px", borderBottom:idx<lowItems.length-1?`1px solid ${G.border}`:"none" }}>
+                  <div>
+                    <div style={{ fontSize:13, fontWeight:600, color:G.text }}>{i.name}</div>
+                    <APill addrId={i.addrId} />
+                  </div>
+                  <div style={{ textAlign:"right" }}>
+                    <div style={{ fontSize:14, fontWeight:800, color:G.accent }}>{i.qty} {i.unit}</div>
+                    <div style={{ fontSize:10, color:G.textMuted }}>მინ: {i.minQ}</div>
+                  </div>
+                </div>)}
+              </div>
+          }
+        </div>
+        <div>
+          <div style={{ fontSize:11, fontWeight:700, color:G.textMuted, textTransform:"uppercase", letterSpacing:.7, marginBottom:10 }}>🕐 ბოლო ოპ.</div>
+          <div style={{ background:G.card, borderRadius:12, boxShadow:"0 1px 3px rgba(0,0,0,.09)", overflow:"hidden" }}>
+            {recent.map((r,i)=><div key={r.id} style={{ display:"flex", justifyContent:"space-between", alignItems:"center", padding:"9px 13px", borderBottom:i<recent.length-1?`1px solid ${G.border}`:"none" }}>
+              <div style={{ display:"flex", gap:8, alignItems:"center" }}>
+                <span style={{ width:26, height:26, borderRadius:7, background:r._t==="შეს."?"#DBEAFE":"#FEF9C3", display:"flex", alignItems:"center", justifyContent:"center", fontSize:12, flexShrink:0 }}>{r._t==="შეს."?"🛒":"💸"}</span>
+                <div>
+                  <div style={{ fontSize:12, fontWeight:600, color:G.text, maxWidth:150, overflow:"hidden", textOverflow:"ellipsis", whiteSpace:"nowrap" }}>{r._n}</div>
+                  <div style={{ fontSize:10, color:G.textMuted }}>{r.date}</div>
+                </div>
+              </div>
+              <div style={{ textAlign:"right" }}>
+                <div style={{ fontSize:13, fontWeight:800, color:r._t==="შეს."?G.blue:G.accent }}>{cur}{r._v?.toFixed(0)}</div>
+                <Badge status={r.status} />
+              </div>
+            </div>)}
+          </div>
+        </div>
+      </div>
+    </>;
+  }
+
+  function PageInventory() {
+    const tv = fItems.reduce((s,i)=>s+i.price*i.qty,0);
+    return <>
+      <div style={{ display:"flex", justifyContent:"space-between", alignItems:"center", marginBottom:16 }}>
+        <h2 style={{ fontSize:20, fontWeight:800, color:G.text, margin:0 }}>ინვენტარი</h2>
+        <Btn onClick={()=>setModal("item")}>+ ახ. პოზ.</Btn>
+      </div>
+      <Filters addr={fA} setAddr={setFA} month={fM} setMonth={setFM} cat={fC} setCat={setFC} status={undefined} setStatus={setFSt} cats={cats} extra={<SearchBox value={sI} onChange={setSI} ph="ძებნა სახ..." />} />
+      <DataTable
+        cols={[
+          { k:"name", label:"პროდუქტი", fn:r=><button onClick={()=>{setDetItem(r);setModal("detail");}} style={{ background:"none",border:"none",cursor:"pointer",textAlign:"left",padding:0,fontFamily:FONT }}>
+              <div style={{ fontSize:13, fontWeight:700, color:G.text }}>{r.name}</div>
+              {r.notes&&<div style={{ fontSize:10, color:G.textMuted }}>{r.notes}</div>}
+            </button>},
+          { k:"cat",   label:"კატ.",   fn:r=>{ const c=cats.find(x=>x.id===r.catId); return <span style={{ fontSize:12, color:G.textSecondary }}>{c?.icon} {c?.name}</span>; }},
+          { k:"addr",  label:"ობ.",    fn:r=><APill addrId={r.addrId} /> },
+          { k:"qty",   label:"რაოდ.", fn:r=><span style={{ fontWeight:700, color:r.qty<=r.minQ?G.accent:G.text, fontSize:13 }}>{r.qty} {r.unit}</span> },
+          { k:"min",   label:"მინ.",  fn:r=><span style={{ fontSize:12, color:G.textMuted }}>{r.minQ} {r.unit}</span> },
+          { k:"price", label:"ფ./ერთ.",fn:r=><span style={{ fontSize:13 }}>{cur}{r.price}</span> },
+          { k:"total", label:"ჯამი",  fn:r=><span style={{ fontWeight:700, color:G.green, fontSize:13 }}>{cur}{(r.price*r.qty).toFixed(2)}</span> },
+          { k:"st",    label:"სტ.",   fn:r=>r.qty<=r.minQ?<Badge status="მოლოდინი"/>:<span style={{ background:"#DCFCE7",color:"#166534",borderRadius:20,padding:"3px 9px",fontSize:11,fontWeight:700 }}>ნ.</span> },
+          { k:"del",   label:"",      fn:r=><button onClick={()=>setItems(p=>p.filter(x=>x.id!==r.id))} style={{ border:"none",background:"none",cursor:"pointer",color:G.textMuted,fontSize:14,padding:3 }}>🗑</button>},
+        ]}
+        rows={fItems}
+        footer={[
+          <span key="c" style={{ fontSize:12, color:G.textSecondary }}>სულ: <strong>{fItems.length}</strong> პ.</span>,
+          <span key="v" style={{ fontSize:12, color:G.textSecondary }}>ჯ.ღ: <strong style={{ color:G.green }}>{cur}{tv.toFixed(2)}</strong></span>,
+          <span key="l" style={{ fontSize:12, color:G.accent }}>მ.მ: <strong>{fItems.filter(i=>i.qty<=i.minQ).length}</strong></span>,
+        ]}
+      />
+    </>;
+  }
+
+  function PageCategories() {
+    return <>
+      <div style={{ display:"flex", justifyContent:"space-between", alignItems:"center", marginBottom:16 }}>
+        <h2 style={{ fontSize:20, fontWeight:800, color:G.text, margin:0 }}>კატეგორიები</h2>
+        <Btn onClick={()=>setModal("cat")}>+ ახ. კატ.</Btn>
+      </div>
+      <div style={{ display:"grid", gridTemplateColumns:"repeat(auto-fill,minmax(190px,1fr))", gap:12 }}>
+        {cats.map(c=>{
+          const cnt = items.filter(i=>i.catId===c.id).length;
+          const pv  = purch.filter(p=>p.catId===c.id).reduce((s,p)=>s+p.qty*p.up,0);
+          const pct = items.length>0?Math.round(cnt/items.length*100):0;
+          return <div key={c.id} style={{ background:G.card, borderRadius:12, padding:"16px 18px", boxShadow:"0 1px 3px rgba(0,0,0,.09)", borderLeft:`3px solid ${c.color||G.border}` }}>
+            <div style={{ display:"flex", justifyContent:"space-between", alignItems:"flex-start", marginBottom:8 }}>
+              <span style={{ fontSize:26 }}>{c.icon}</span>
+              <span style={{ fontSize:10, fontWeight:700, color:G.textMuted, background:"#F3F4F6", borderRadius:20, padding:"2px 7px" }}>{pct}%</span>
+            </div>
+            <div style={{ fontSize:13, fontWeight:700, color:G.text, marginBottom:5 }}>{c.name}</div>
+            <div style={{ display:"flex", gap:10, marginBottom:6 }}>
+              <span style={{ fontSize:11, color:G.textMuted }}>📦 {cnt}</span>
+              <span style={{ fontSize:11, color:G.textMuted }}>🛒 {purch.filter(p=>p.catId===c.id).length}</span>
+            </div>
+            <div style={{ fontSize:12, fontWeight:700, color:G.green, marginBottom:7 }}>{cur}{pv.toFixed(0)}</div>
+            <div style={{ width:"100%", height:4, background:"#F3F4F6", borderRadius:4 }}>
+              <div style={{ width:`${pct}%`, height:"100%", background:c.color||G.accent, borderRadius:4 }} />
+            </div>
+          </div>;
+        })}
+      </div>
+    </>;
+  }
+
+  function PagePurchases() {
+    const tot = fPurch.reduce((s,p)=>s+p.qty*p.up,0);
+    const tq  = fPurch.reduce((s,p)=>s+p.qty,0);
+    return <>
+      <div style={{ display:"flex", justifyContent:"space-between", alignItems:"center", marginBottom:16 }}>
+        <h2 style={{ fontSize:20, fontWeight:800, color:G.text, margin:0 }}>შესყიდვები</h2>
+        <Btn onClick={()=>setModal("purch")}>🛒 + შეს.</Btn>
+      </div>
+      <div style={{ display:"grid", gridTemplateColumns:"repeat(auto-fit,minmax(150px,1fr))", gap:10, marginBottom:14 }}>
+        <KCard label="ჩანაწ." value={fPurch.length} icon="📋" />
+        <KCard label="სულ რ." value={tq.toFixed(0)} icon="📦" color={G.blue} />
+        <KCard label="თანხა" value={`${cur}${tot.toFixed(0)}`} icon="💰" color={G.green} />
+        <KCard label="დღგ" value={`${cur}${(tot*+cfg.tax/100).toFixed(0)}`} icon="🧾" color={G.amber} sub={`${cfg.tax}%`} />
+      </div>
+      <Filters addr={fA} setAddr={setFA} month={fM} setMonth={setFM} cat={fC} setCat={setFC} status={fSt} setStatus={setFSt} cats={cats} extra={<SearchBox value={sP} onChange={setSP} ph="ძებნა..." />} />
+      <DataTable
+        cols={[
+          { k:"date",  label:"თარ.",  fn:r=><span style={{ fontSize:12, color:G.textMuted }}>{r.date}</span> },
+          { k:"item",  label:"საქ.",  fn:r=><span style={{ fontSize:13, fontWeight:700 }}>{r.item}</span> },
+          { k:"cat",   label:"კატ.",  fn:r=>{ const c=cats.find(x=>x.id===r.catId); return <span style={{ fontSize:12 }}>{c?.icon} {c?.name?.slice(0,12)}</span>; }},
+          { k:"addr",  label:"ობ.",   fn:r=><APill addrId={r.addrId} /> },
+          { k:"qty",   label:"რ.",    fn:r=><span style={{ fontWeight:700, color:G.blue, fontSize:13 }}>{r.qty} {r.unit}</span> },
+          { k:"up",    label:"ფ./ე.", fn:r=><span style={{ fontSize:13 }}>{cur}{r.up}</span> },
+          { k:"tot",   label:"ჯ.",    fn:r=><span style={{ fontWeight:700, color:G.green, fontSize:13 }}>{cur}{(r.qty*r.up).toFixed(2)}</span> },
+          { k:"sup",   label:"მომ.", fn:r=><span style={{ fontSize:12, color:G.textSecondary }}>{r.sup}</span> },
+          { k:"st",    label:"სტ.",  fn:r=><select value={r.status} onChange={e=>setPurch(p=>p.map(x=>x.id===r.id?{...x,status:e.target.value}:x))} style={{ ...iStyle, padding:"3px 6px", fontSize:11, width:"auto" }}>{Object.keys(STATUS_META).map(s=><option key={s}>{s}</option>)}</select> },
+          { k:"del",   label:"",     fn:r=><button onClick={()=>setPurch(p=>p.filter(x=>x.id!==r.id))} style={{ border:"none",background:"none",cursor:"pointer",color:G.textMuted,fontSize:14,padding:3 }}>🗑</button>},
+        ]}
+        rows={fPurch}
+        footer={[
+          <span key="t" style={{ fontSize:12, color:G.textSecondary }}>ჯ.: <strong style={{ color:G.green }}>{cur}{tot.toFixed(2)}</strong></span>,
+          <span key="q" style={{ fontSize:12, color:G.textSecondary }}>რ.: <strong>{tq.toFixed(1)}</strong></span>,
+        ]}
+      />
+    </>;
+  }
+
+  function PageSpends() {
+    const tot  = fSpend.reduce((s,sp)=>s+sp.amount,0);
+    const appr = fSpend.filter(s=>s.status==="დამტკიცებული").reduce((s,sp)=>s+sp.amount,0);
+    const pend = fSpend.filter(s=>s.status==="მოლოდინი").reduce((s,sp)=>s+sp.amount,0);
+    return <>
+      <div style={{ display:"flex", justifyContent:"space-between", alignItems:"center", marginBottom:16 }}>
+        <h2 style={{ fontSize:20, fontWeight:800, color:G.text, margin:0 }}>ხარჯები</h2>
+        <Btn onClick={()=>setModal("spend")}>💸 + ხარ.</Btn>
+      </div>
+      <div style={{ display:"grid", gridTemplateColumns:"repeat(auto-fit,minmax(150px,1fr))", gap:10, marginBottom:14 }}>
+        <KCard label="ჩ." value={fSpend.length} icon="📋" />
+        <KCard label="სულ" value={`${cur}${tot.toFixed(0)}`} icon="💸" color={G.accent} />
+        <KCard label="დამტ." value={`${cur}${appr.toFixed(0)}`} icon="✅" color={G.green} />
+        <KCard label="მოლ." value={`${cur}${pend.toFixed(0)}`} icon="⏳" color={G.amber} />
+      </div>
+      {/* addr bars */}
+      <div style={{ display:"grid", gridTemplateColumns:"repeat(auto-fit,minmax(190px,1fr))", gap:10, marginBottom:14 }}>
+        {ADDRESSES.map(a=>{ const t=spends.filter(s=>s.addrId===a.id).reduce((s,sp)=>s+sp.amount,0); const mx=Math.max(...ADDRESSES.map(x=>spends.filter(s=>s.addrId===x.id).reduce((s,sp)=>s+sp.amount,0)),1); return (
+          <div key={a.id} style={{ background:G.card, borderRadius:10, padding:"12px 14px", boxShadow:"0 1px 3px rgba(0,0,0,.09)", display:"flex", gap:10, alignItems:"center" }}>
+            <div style={{ width:4, borderRadius:4, alignSelf:"stretch", background:a.color }} />
+            <div style={{ flex:1 }}>
+              <div style={{ fontSize:11, color:G.textMuted, fontWeight:600 }}>{a.short}</div>
+              <div style={{ fontSize:18, fontWeight:800, color:a.color, margin:"2px 0" }}>{cur}{t.toFixed(0)}</div>
+              <div style={{ width:"100%", height:4, background:"#F3F4F6", borderRadius:4 }}><div style={{ width:`${t/mx*100}%`, height:"100%", background:a.color, borderRadius:4 }} /></div>
+            </div>
+          </div>
+        ); })}
+      </div>
+      <Filters addr={fA} setAddr={setFA} month={fM} setMonth={setFM} cat={fC} setCat={setFC} status={fSt} setStatus={setFSt} cats={cats} extra={<SearchBox value={sSp} onChange={setSSp} ph="ძებნა..." />} />
+      <DataTable
+        cols={[
+          { k:"date", label:"თარ.", fn:r=><span style={{ fontSize:12, color:G.textMuted }}>{r.date}</span> },
+          { k:"desc", label:"აღ.",  fn:r=><div><div style={{ fontSize:13, fontWeight:600 }}>{r.desc}</div>{r.notes&&<div style={{ fontSize:10, color:G.textMuted }}>{r.notes}</div>}</div> },
+          { k:"cat",  label:"კატ.", fn:r=>{ const c=cats.find(x=>x.id===r.catId); return <span style={{ fontSize:12 }}>{c?.icon} {c?.name?.slice(0,12)}</span>; }},
+          { k:"addr", label:"ობ.",  fn:r=><APill addrId={r.addrId} /> },
+          { k:"amt",  label:"თ.",   fn:r=><span style={{ fontWeight:800, color:G.accent, fontSize:14 }}>{cur}{r.amount.toFixed(2)}</span> },
+          { k:"st",   label:"სტ.", fn:r=><select value={r.status} onChange={e=>setSpends(p=>p.map(x=>x.id===r.id?{...x,status:e.target.value}:x))} style={{ ...iStyle, padding:"3px 6px", fontSize:11, width:"auto" }}>{Object.keys(STATUS_META).map(s=><option key={s}>{s}</option>)}</select> },
+          { k:"del",  label:"",    fn:r=><button onClick={()=>setSpends(p=>p.filter(x=>x.id!==r.id))} style={{ border:"none",background:"none",cursor:"pointer",color:G.textMuted,fontSize:14,padding:3 }}>🗑</button>},
+        ]}
+        rows={fSpend}
+        footer={[<span key="t" style={{ fontSize:12 }}>ჯ.: <strong style={{ color:G.accent }}>{cur}{tot.toFixed(2)}</strong></span>]}
+      />
+    </>;
+  }
+
+  function PageReports() {
+    const mSt = Array.from({length:12},(_,i)=>({
+      m: MONTHS_S[i],
+      p: purch.filter(x=>new Date(x.date).getMonth()===i).reduce((s,x)=>s+x.qty*x.up,0),
+      s: spends.filter(x=>new Date(x.date).getMonth()===i).reduce((s,x)=>s+x.amount,0),
+    }));
+    const mMax = Math.max(...mSt.map(m=>m.p+m.s),1);
+    const cBreak = cats.map(c=>({ ...c, t: purch.filter(p=>p.catId===c.id).reduce((s,p)=>s+p.qty*p.up,0)+spends.filter(s=>s.catId===c.id).reduce((s,sp)=>s+sp.amount,0) })).filter(c=>c.t>0).sort((a,b)=>b.t-a.t);
+    const cMax = Math.max(...cBreak.map(c=>c.t),1);
+    return <>
+      <h2 style={{ fontSize:20, fontWeight:800, color:G.text, margin:"0 0 16px" }}>ანგარიშები</h2>
+      <div style={{ display:"grid", gridTemplateColumns:"repeat(auto-fit,minmax(150px,1fr))", gap:10, marginBottom:16 }}>
+        <KCard label="წ. შეს." value={`${cur}${purch.reduce((s,p)=>s+p.qty*p.up,0).toFixed(0)}`} icon="🛒" color={G.blue} />
+        <KCard label="წ. ხარ." value={`${cur}${spends.reduce((s,sp)=>s+sp.amount,0).toFixed(0)}`} icon="💸" color={G.accent} />
+        <KCard label="ინვ.ღ." value={`${cur}${invVal.toFixed(0)}`} icon="💰" color={G.green} />
+        <KCard label="ტრ." value={purch.length+spends.length} icon="📋" color={G.purple} />
+      </div>
+      <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:14 }}>
+        {/* bar */}
+        <div style={{ background:G.card, borderRadius:12, padding:"18px", boxShadow:"0 1px 3px rgba(0,0,0,.09)" }}>
+          <h3 style={{ fontSize:14, fontWeight:700, color:G.text, margin:"0 0 14px" }}>📈 თვ. აქტ.</h3>
+          <div style={{ display:"flex", alignItems:"flex-end", gap:3, height:110 }}>
+            {mSt.map((m,i)=><div key={i} style={{ flex:1, display:"flex", flexDirection:"column", alignItems:"center", height:"100%" }}>
+              <div style={{ flex:1, display:"flex", flexDirection:"column", justifyContent:"flex-end", width:"100%", gap:1 }}>
+                <div style={{ height:`${m.s/mMax*100}%`, background:"#FCA5A5", borderRadius:"2px 2px 0 0", minHeight:m.s>0?2:0 }} />
+                <div style={{ height:`${m.p/mMax*100}%`, background:G.blue, borderRadius:"2px 2px 0 0", minHeight:m.p>0?2:0 }} />
+              </div>
+              <span style={{ fontSize:8, color:G.textMuted, marginTop:3, fontWeight:600 }}>{m.m}</span>
+            </div>)}
+          </div>
+          <div style={{ display:"flex", gap:12, marginTop:10 }}>
+            {[["შეს.",G.blue],["ხარ.","#FCA5A5"]].map(([l,c])=><span key={l} style={{ display:"flex", alignItems:"center", gap:4, fontSize:11, color:G.textSecondary }}><span style={{ width:9, height:9, background:c, borderRadius:2, display:"inline-block" }} />{l}</span>)}
+          </div>
+        </div>
+        {/* cat */}
+        <div style={{ background:G.card, borderRadius:12, padding:"18px", boxShadow:"0 1px 3px rgba(0,0,0,.09)" }}>
+          <h3 style={{ fontSize:14, fontWeight:700, color:G.text, margin:"0 0 12px" }}>🗂 კატ. ბიუჯ.</h3>
+          {cBreak.map(c=><div key={c.id} style={{ marginBottom:10 }}>
+            <div style={{ display:"flex", justifyContent:"space-between", marginBottom:3 }}>
+              <span style={{ fontSize:12, fontWeight:600, color:G.text }}>{c.icon} {c.name}</span>
+              <span style={{ fontSize:12, fontWeight:700, color:c.color||G.accent }}>{cur}{c.t.toFixed(0)}</span>
+            </div>
+            <div style={{ width:"100%", height:5, background:"#F3F4F6", borderRadius:4 }}>
+              <div style={{ width:`${c.t/cMax*100}%`, height:"100%", background:c.color||G.accent, borderRadius:4 }} />
+            </div>
+          </div>)}
+        </div>
+        {/* addr */}
+        <div style={{ background:G.card, borderRadius:12, padding:"18px", boxShadow:"0 1px 3px rgba(0,0,0,.09)", gridColumn:"1/-1" }}>
+          <h3 style={{ fontSize:14, fontWeight:700, color:G.text, margin:"0 0 14px" }}>🏗 ობ. შედარ.</h3>
+          <div style={{ display:"grid", gridTemplateColumns:"repeat(3,1fr)", gap:16 }}>
+            {ADDRESSES.map(a=>{ const p=purch.filter(x=>x.addrId===a.id).reduce((s,x)=>s+x.qty*x.up,0); const s=spends.filter(x=>x.addrId===a.id).reduce((s,x)=>s+x.amount,0); const mx=Math.max(p,s,1); return (
+              <div key={a.id}>
+                <div style={{ fontSize:13, fontWeight:700, color:a.color, marginBottom:10 }}>{a.short}</div>
+                {[["შეს.",p,a.color],["ხარ.",s,G.accent]].map(([l,v,c])=><div key={l} style={{ marginBottom:8 }}>
+                  <div style={{ display:"flex", justifyContent:"space-between", marginBottom:3 }}>
+                    <span style={{ fontSize:11, color:G.textSecondary }}>{l}</span>
+                    <span style={{ fontSize:11, fontWeight:700, color:c }}>{cur}{v.toFixed(0)}</span>
+                  </div>
+                  <div style={{ width:"100%", height:5, background:"#F3F4F6", borderRadius:4 }}><div style={{ width:`${v/mx*100}%`, height:"100%", background:c, borderRadius:4 }} /></div>
+                </div>)}
+              </div>
+            ); })}
+          </div>
+        </div>
+      </div>
+    </>;
+  }
+
+  function PageSettings() {
+    return <>
+      <h2 style={{ fontSize:20, fontWeight:800, color:G.text, margin:"0 0 16px" }}>პარამეტრები</h2>
+      <div style={{ display:"grid", gridTemplateColumns:"repeat(auto-fit,minmax(280px,1fr))", gap:14 }}>
+        <div style={{ background:G.card, borderRadius:12, padding:"18px", boxShadow:"0 1px 3px rgba(0,0,0,.09)" }}>
+          <h3 style={{ fontSize:14, fontWeight:700, color:G.text, margin:"0 0 12px" }}>📦 ინვ. პარ.</h3>
+          <Toggle label="მ.მ. შეტყ." desc="გამ. მინ. დ-ზე" value={cfg.lowAlert} onChange={()=>setCfg(p=>({...p,lowAlert:!p.lowAlert}))} />
+          <Toggle label="ავტ. გამ." desc="შეკვ. მინ. დ-ზე" value={cfg.autoOrder} onChange={()=>setCfg(p=>({...p,autoOrder:!p.autoOrder}))} />
+          <Toggle label="ელ. შ." desc="შ. ელ.ფ-ით" value={cfg.emailNotif} onChange={()=>setCfg(p=>({...p,emailNotif:!p.emailNotif}))} />
+          <Toggle label="დამტ. სავ." desc="ხ. ადმ. დ." value={cfg.approval} onChange={()=>setCfg(p=>({...p,approval:!p.approval}))} />
+        </div>
+        <div style={{ background:G.card, borderRadius:12, padding:"18px", boxShadow:"0 1px 3px rgba(0,0,0,.09)" }}>
+          <h3 style={{ fontSize:14, fontWeight:700, color:G.text, margin:"0 0 12px" }}>💱 ფინ. პ.</h3>
+          <div style={{ display:"flex", flexDirection:"column", gap:10 }}>
+            <Inp label="ვალ. სიმბ." value={cfg.cur} onChange={e=>setCfg(p=>({...p,cur:e.target.value}))} />
+            <Inp label="დღგ %" type="number" value={cfg.tax} onChange={e=>setCfg(p=>({...p,tax:e.target.value}))} />
+            <Sel label="ნაგ. ერთ." value={cfg.defUnit} onChange={e=>setCfg(p=>({...p,defUnit:e.target.value}))}>
+              {UNITS.map(u=><option key={u}>{u}</option>)}
+            </Sel>
+          </div>
+        </div>
+        <div style={{ background:G.card, borderRadius:12, padding:"18px", boxShadow:"0 1px 3px rgba(0,0,0,.09)" }}>
+          <h3 style={{ fontSize:14, fontWeight:700, color:G.text, margin:"0 0 12px" }}>🏗 ობ.</h3>
+          {ADDRESSES.map(a=><div key={a.id} style={{ display:"flex", alignItems:"center", gap:10, marginBottom:8, padding:"10px 12px", background:"#F9FAFB", borderRadius:8, borderLeft:`3px solid ${a.color}` }}>
+            <div style={{ flex:1 }}>
+              <div style={{ fontSize:12, fontWeight:700, color:G.text }}>{a.name.split(" – ")[0]}</div>
+              <div style={{ fontSize:11, color:G.textMuted }}>{a.name.split(" – ")[1]}</div>
+            </div>
+            <span style={{ width:8, height:8, borderRadius:"50%", background:a.color }} />
+          </div>)}
+        </div>
+        <div style={{ background:G.card, borderRadius:12, padding:"18px", boxShadow:"0 1px 3px rgba(0,0,0,.09)" }}>
+          <h3 style={{ fontSize:14, fontWeight:700, color:G.text, margin:"0 0 12px" }}>📊 სისტ.</h3>
+          {[["პოზ.",items.length],["შეს.",purch.length],["ხარ.",spends.length],["კატ.",cats.length]].map(([l,v])=><div key={l} style={{ display:"flex", justifyContent:"space-between", padding:"7px 0", borderBottom:`1px solid ${G.border}`, fontSize:13 }}>
+            <span style={{ color:G.textSecondary }}>{l}</span><strong>{v}</strong>
+          </div>)}
+          <Btn variant="secondary" size="sm" style={{ width:"100%", marginTop:12 }} onClick={()=>alert("მალე!")}>📤 Excel ექსპ.</Btn>
+        </div>
+      </div>
+    </>;
+  }
+
+  /* notif list */
+  const notifs = [
+    ...lowItems.map(i=>({ id:i.id, msg:`⚠️ ${i.name} — მ. მ. (${i.qty}/${i.minQ} ${i.unit})`, c:G.accent })),
+    ...purch.filter(p=>p.status==="მოლოდინი").map(p=>({ id:"p"+p.id, msg:`🛒 "${p.item}" — მოლ.`, c:G.amber })),
+    ...spends.filter(s=>s.status==="მოლოდინი"&&cfg.approval).map(s=>({ id:"s"+s.id, msg:`💸 "${s.desc}" — დამტ. საჭ.`, c:G.amber })),
+  ];
+
+  const pageMap = { dashboard:<PageDashboard/>, inventory:<PageInventory/>, categories:<PageCategories/>, purchases:<PagePurchases/>, spends:<PageSpends/>, reports:<PageReports/>, settings:<PageSettings/> };
+
+  return (
+    <div style={{ display:"flex", minHeight:"100vh", fontFamily:FONT, background:G.bg, fontSize:13 }}>
+
+      {/* SIDEBAR */}
+      <div style={{ width:collapsed?60:210, background:G.sidebar, display:"flex", flexDirection:"column", transition:"width .2s", flexShrink:0, position:"sticky", top:0, height:"100vh" }}>
+        <div style={{ padding:collapsed?"14px 0":"16px 14px", display:"flex", alignItems:"center", gap:10, borderBottom:`1px solid ${G.sidebarBorder}`, justifyContent:collapsed?"center":"flex-start", minHeight:60 }}>
+          <div style={{ width:32, height:32, borderRadius:8, background:G.accent, display:"flex", alignItems:"center", justifyContent:"center", fontSize:16, flexShrink:0 }}>🏗</div>
+          {!collapsed&&<div>
+            <div style={{ color:"#F9FAFB", fontWeight:800, fontSize:12, lineHeight:1.2 }}>სტრუქტურა</div>
+            <div style={{ color:"#6B7280", fontSize:10, fontWeight:600 }}>დეველოპმენტი</div>
+          </div>}
+        </div>
+        <nav style={{ flex:1, padding:"8px 6px", overflowY:"auto" }}>
+          {NAV.map(n=>{
+            const a = page===n.id;
+            return <button key={n.id} onClick={()=>setPage(n.id)} title={n.label} style={{ display:"flex", alignItems:"center", gap:8, width:"100%", padding:collapsed?"10px 0":"9px 10px", borderRadius:9, border:"none", background:a?"#1F2937":"transparent", color:a?"#F9FAFB":"#9CA3AF", cursor:"pointer", fontFamily:FONT, fontSize:12, fontWeight:a?700:500, transition:"all .12s", marginBottom:1, justifyContent:collapsed?"center":"flex-start" }}>
+              <span style={{ fontSize:14, flexShrink:0 }}>{n.icon}</span>
+              {!collapsed&&<span style={{ flex:1 }}>{n.label}</span>}
+              {!collapsed&&a&&<span style={{ width:4, height:4, borderRadius:"50%", background:G.accent, flexShrink:0 }} />}
+            </button>;
+          })}
+        </nav>
+        <button onClick={()=>setCollapsed(p=>!p)} style={{ margin:6, padding:"8px", border:`1px solid ${G.sidebarBorder}`, background:"transparent", borderRadius:8, color:"#6B7280", cursor:"pointer", fontSize:11, fontFamily:FONT, display:"flex", alignItems:"center", justifyContent:"center" }}>
+          {collapsed?"▶":"◀"}
+        </button>
+      </div>
+
+      {/* MAIN */}
+      <div style={{ flex:1, display:"flex", flexDirection:"column", minWidth:0 }}>
+        {/* TOPBAR */}
+        <div style={{ background:"#fff", borderBottom:`1px solid ${G.border}`, padding:"0 22px", display:"flex", alignItems:"center", justifyContent:"space-between", height:52, position:"sticky", top:0, zIndex:10 }}>
+          <div>
+            <div style={{ fontSize:15, fontWeight:800, color:G.text, lineHeight:1.2 }}>{NAV.find(n=>n.id===page)?.label}</div>
+            <div style={{ fontSize:10, color:G.textMuted, fontWeight:600 }}>სტრ. დეველ. · {now.toLocaleDateString("ka-GE")}</div>
+          </div>
+          <div style={{ display:"flex", gap:8, alignItems:"center" }}>
+            <div style={{ position:"relative" }}>
+              <button onClick={()=>setNotifOpen(p=>!p)} style={{ width:34, height:34, borderRadius:9, border:`1px solid ${G.border}`, background:"#F9FAFB", cursor:"pointer", display:"flex", alignItems:"center", justifyContent:"center", fontSize:15, position:"relative" }}>
+                🔔
+                {notifs.length>0&&<span style={{ position:"absolute", top:-4, right:-4, background:G.accent, color:"#fff", borderRadius:"50%", width:15, height:15, fontSize:9, fontWeight:800, display:"flex", alignItems:"center", justifyContent:"center" }}>{notifs.length}</span>}
+              </button>
+              {notifOpen&&<div style={{ position:"absolute", right:0, top:42, width:300, background:"#fff", borderRadius:12, boxShadow:"0 8px 28px rgba(0,0,0,0.15)", border:`1px solid ${G.border}`, zIndex:100 }}>
+                <div style={{ padding:"10px 14px", borderBottom:`1px solid ${G.border}`, fontWeight:700, fontSize:13, color:G.text }}>შეტყ. ({notifs.length})</div>
+                <div style={{ maxHeight:260, overflowY:"auto" }}>
+                  {notifs.length===0
+                    ? <div style={{ padding:"18px", textAlign:"center", color:G.textMuted, fontSize:12 }}>✅ ყველა ნ.</div>
+                    : notifs.map(n=><div key={n.id} style={{ padding:"9px 14px", borderBottom:`1px solid ${G.border}`, fontSize:12, color:n.c, fontWeight:600 }}>{n.msg}</div>)
+                  }
+                </div>
+                <button onClick={()=>setNotifOpen(false)} style={{ width:"100%", padding:"9px", border:"none", background:"#F9FAFB", borderTop:`1px solid ${G.border}`, cursor:"pointer", fontSize:12, color:G.textSecondary, fontFamily:FONT, borderRadius:"0 0 12px 12px" }}>დახ.</button>
+              </div>}
+            </div>
+            <div style={{ width:34, height:34, borderRadius:9, background:G.accent, display:"flex", alignItems:"center", justifyContent:"center", color:"#fff", fontWeight:800, fontSize:13 }}>ა</div>
+          </div>
+        </div>
+
+        {/* CONTENT */}
+        <div style={{ flex:1, padding:"20px 22px", overflowY:"auto" }}>
+          {pageMap[page]}
+        </div>
+      </div>
+
+      {/* MODALS */}
+      {modal==="item"&&<Modal title="➕ ახ. ინვ. პოზ." onClose={()=>setModal(null)}>
+        <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:11 }}>
+          <div style={{ gridColumn:"1/-1" }}><Inp label="სახ. *" value={iF.name} onChange={e=>setIF(p=>({...p,name:e.target.value}))} placeholder="მ. ცემ. M400" /></div>
+          <Sel label="კატ. *" value={iF.catId} onChange={e=>setIF(p=>({...p,catId:e.target.value}))}>{cats.map(c=><option key={c.id} value={c.id}>{c.icon} {c.name}</option>)}</Sel>
+          <Sel label="ობ. *" value={iF.addrId} onChange={e=>setIF(p=>({...p,addrId:e.target.value}))}>{ADDRESSES.map(a=><option key={a.id} value={a.id}>{a.name}</option>)}</Sel>
+          <Inp label="საწ. რ. *" type="number" value={iF.qty} onChange={e=>setIF(p=>({...p,qty:e.target.value}))} placeholder="0" />
+          <Sel label="ერთ." value={iF.unit} onChange={e=>setIF(p=>({...p,unit:e.target.value}))}>{UNITS.map(u=><option key={u}>{u}</option>)}</Sel>
+          <Inp label="მინ. მ." type="number" value={iF.minQ} onChange={e=>setIF(p=>({...p,minQ:e.target.value}))} placeholder="0" />
+          <Inp label={`ფ./ე. (${cur})`} type="number" value={iF.price} onChange={e=>setIF(p=>({...p,price:e.target.value}))} placeholder="0.00" />
+          <div style={{ gridColumn:"1/-1" }}><Txa label="შენ." value={iF.notes} onChange={e=>setIF(p=>({...p,notes:e.target.value}))} placeholder="..." /></div>
+        </div>
+        {iF.qty&&iF.price&&<div style={{ background:"#F0FDF4", border:`1px solid #BBF7D0`, borderRadius:8, padding:"9px 13px", marginTop:10, fontSize:13, fontWeight:700, color:G.green }}>💰 ჯ.ღ: {cur}{(+iF.qty*+iF.price).toFixed(2)}</div>}
+        <div style={{ display:"flex", gap:8, marginTop:14, justifyContent:"flex-end" }}>
+          <Btn variant="secondary" onClick={()=>setModal(null)}>გაუქ.</Btn>
+          <Btn onClick={addItem} disabled={!iF.name||!iF.qty}>შ.</Btn>
+        </div>
+      </Modal>}
+
+      {modal==="purch"&&<Modal title="🛒 ახ. შეს." onClose={()=>setModal(null)}>
+        <div style={{ background:"#EFF6FF", border:`1px solid #BFDBFE`, borderRadius:8, padding:"9px 13px", marginBottom:12, fontSize:12, color:"#1E40AF", fontWeight:600 }}>⚠️ შ-ეთ ობ. — ავტ. ინვ. განახ.</div>
+        <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:11 }}>
+          <Inp label="თარ. *" type="date" value={pF.date} onChange={e=>setPF(p=>({...p,date:e.target.value}))} />
+          <Sel label="ობ. *" value={pF.addrId} onChange={e=>setPF(p=>({...p,addrId:e.target.value}))}>{ADDRESSES.map(a=><option key={a.id} value={a.id}>{a.name}</option>)}</Sel>
+          <div style={{ gridColumn:"1/-1" }}><Inp label="საქ. სახ. *" value={pF.item} onChange={e=>setPF(p=>({...p,item:e.target.value}))} placeholder="მ. ცემ. M400" /></div>
+          <Sel label="კატ." value={pF.catId} onChange={e=>setPF(p=>({...p,catId:e.target.value}))}>{cats.map(c=><option key={c.id} value={c.id}>{c.icon} {c.name}</option>)}</Sel>
+          <Inp label="მომ-კი" value={pF.sup} onChange={e=>setPF(p=>({...p,sup:e.target.value}))} placeholder="კ. სახ." />
+          <Inp label="რ. *" type="number" value={pF.qty} onChange={e=>setPF(p=>({...p,qty:e.target.value}))} placeholder="0" />
+          <Sel label="ერთ." value={pF.unit} onChange={e=>setPF(p=>({...p,unit:e.target.value}))}>{UNITS.map(u=><option key={u}>{u}</option>)}</Sel>
+          <Inp label={`ე.ფ.(${cur})*`} type="number" value={pF.up} onChange={e=>setPF(p=>({...p,up:e.target.value}))} placeholder="0.00" />
+          <Sel label="სტ." value={pF.status} onChange={e=>setPF(p=>({...p,status:e.target.value}))}>{Object.keys(STATUS_META).map(s=><option key={s}>{s}</option>)}</Sel>
+          <div style={{ gridColumn:"1/-1" }}><Txa label="შენ." value={pF.notes} onChange={e=>setPF(p=>({...p,notes:e.target.value}))} placeholder="..." /></div>
+        </div>
+        {pF.qty&&pF.up&&<div style={{ background:"#F0FDF4", border:`1px solid #BBF7D0`, borderRadius:8, padding:"9px 13px", marginTop:10, fontSize:13, fontWeight:800, color:G.green }}>✅ ჯ: {cur}{(+pF.qty*+pF.up).toFixed(2)} | დღგ: {cur}{(+pF.qty*+pF.up*+cfg.tax/100).toFixed(2)}</div>}
+        <div style={{ display:"flex", gap:8, marginTop:14, justifyContent:"flex-end" }}>
+          <Btn variant="secondary" onClick={()=>setModal(null)}>გაუქ.</Btn>
+          <Btn onClick={addPurch} disabled={!pF.item||!pF.qty||!pF.up}>შ.</Btn>
+        </div>
+      </Modal>}
+
+      {modal==="spend"&&<Modal title="💸 ხ. ბრძ." onClose={()=>setModal(null)}>
+        <div style={{ background:"#FFF5F5", border:`1px solid #FED7D7`, borderRadius:8, padding:"9px 13px", marginBottom:12, fontSize:12, color:"#991B1B", fontWeight:600 }}>💸 ობ. ხარჯი{cfg.approval?" — ადმ. დამტ. საჭ.":""}</div>
+        <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:11 }}>
+          <Inp label="თარ. *" type="date" value={sF.date} onChange={e=>setSF(p=>({...p,date:e.target.value}))} />
+          <Sel label="ობ. *" value={sF.addrId} onChange={e=>setSF(p=>({...p,addrId:e.target.value}))}>{ADDRESSES.map(a=><option key={a.id} value={a.id}>{a.name}</option>)}</Sel>
+          <div style={{ gridColumn:"1/-1" }}><Inp label="აღ. *" value={sF.desc} onChange={e=>setSF(p=>({...p,desc:e.target.value}))} placeholder="მ. ბეტ. II სართ." /></div>
+          <Sel label="კატ." value={sF.catId} onChange={e=>setSF(p=>({...p,catId:e.target.value}))}>{cats.map(c=><option key={c.id} value={c.id}>{c.icon} {c.name}</option>)}</Sel>
+          <Inp label={`თ.(${cur})*`} type="number" value={sF.amount} onChange={e=>setSF(p=>({...p,amount:e.target.value}))} placeholder="0.00" />
+          <Sel label="სტ." value={sF.status} onChange={e=>setSF(p=>({...p,status:e.target.value}))}>{Object.keys(STATUS_META).map(s=><option key={s}>{s}</option>)}</Sel>
+          <div style={{ gridColumn:"1/-1" }}><Txa label="შენ." value={sF.notes} onChange={e=>setSF(p=>({...p,notes:e.target.value}))} placeholder="..." /></div>
+        </div>
+        <div style={{ display:"flex", gap:8, marginTop:14, justifyContent:"flex-end" }}>
+          <Btn variant="secondary" onClick={()=>setModal(null)}>გაუქ.</Btn>
+          <Btn variant="success" onClick={addSpend} disabled={!sF.desc||!sF.amount}>გაგზ.</Btn>
+        </div>
+      </Modal>}
+
+      {modal==="cat"&&<Modal title="🗂 ახ. კატ." onClose={()=>setModal(null)} width={360}>
+        <div style={{ display:"flex", flexDirection:"column", gap:10 }}>
+          <Inp label="სახ. *" value={cF.name} onChange={e=>setCF(p=>({...p,name:e.target.value}))} placeholder="კატ. სახ." />
+          <Inp label="ემოჯ." value={cF.icon} onChange={e=>setCF(p=>({...p,icon:e.target.value}))} placeholder="📦" />
+          <Inp label="ფერი" value={cF.color} onChange={e=>setCF(p=>({...p,color:e.target.value}))} placeholder="#6B7280" />
+        </div>
+        <div style={{ display:"flex", gap:8, marginTop:14, justifyContent:"flex-end" }}>
+          <Btn variant="secondary" onClick={()=>setModal(null)}>გაუქ.</Btn>
+          <Btn onClick={addCat} disabled={!cF.name}>შ.</Btn>
+        </div>
+      </Modal>}
+
+      {modal==="detail"&&detItem&&(()=>{
+        const c=cats.find(x=>x.id===detItem.catId), a=ADDRESSES.find(x=>x.id===detItem.addrId);
+        const low=detItem.qty<=detItem.minQ;
+        const pct=detItem.minQ>0?Math.min(100,detItem.qty/detItem.minQ*100):100;
+        return <Modal title={`📦 ${detItem.name}`} onClose={()=>{ setModal(null); setDetItem(null); }} width={400}>
+          <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:8, marginBottom:12 }}>
+            {[["კატ.",`${c?.icon} ${c?.name}`],["ობ.",a?.name.split(" – ")[0]],["რ.",`${detItem.qty} ${detItem.unit}`],["მინ.მ.",`${detItem.minQ} ${detItem.unit}`],[`ფ./ე.`,`${cur}${detItem.price}`],["ჯ.ღ.",`${cur}${(detItem.price*detItem.qty).toFixed(2)}`]].map(([l,v])=>
+              <div key={l} style={{ background:"#F9FAFB", borderRadius:8, padding:"9px 11px" }}>
+                <div style={{ fontSize:9, color:G.textMuted, fontWeight:700, textTransform:"uppercase", letterSpacing:.5 }}>{l}</div>
+                <div style={{ fontSize:13, fontWeight:700, color:G.text, marginTop:2 }}>{v}</div>
+              </div>
+            )}
+          </div>
+          <div style={{ marginBottom:12 }}>
+            <div style={{ display:"flex", justifyContent:"space-between", fontSize:11, color:G.textMuted, marginBottom:3 }}>
+              <span>მარ. დ.</span>
+              <span style={{ fontWeight:700, color:low?G.accent:G.green }}>{low?"⚠ მ.":"✅ ნ."}</span>
+            </div>
+            <div style={{ width:"100%", height:7, background:"#F3F4F6", borderRadius:4 }}>
+              <div style={{ width:`${pct}%`, height:"100%", background:low?G.accent:G.green, borderRadius:4 }} />
+            </div>
+          </div>
+          {detItem.notes&&<div style={{ background:"#FFF9C4", borderRadius:8, padding:"9px 11px", fontSize:12, color:"#78350F", marginBottom:12 }}>📝 {detItem.notes}</div>}
+          <div style={{ display:"flex", gap:8, justifyContent:"flex-end" }}>
+            <Btn size="sm" variant="secondary" onClick={()=>{ setModal(null); setDetItem(null); }}>დახ.</Btn>
+            <Btn size="sm" onClick={()=>{ setModal("purch"); setDetItem(null); }}>🛒 შეს.</Btn>
+          </div>
+        </Modal>;
+      })()}
+    </div>
+  );
+}
+
+const root = ReactDOM.createRoot(document.getElementById('root'));
+root.render(<App />);
+  </script>
+</body>
+</html>
